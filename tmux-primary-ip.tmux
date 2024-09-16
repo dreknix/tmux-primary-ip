@@ -47,6 +47,7 @@ main() {
   then
     set_tmux_option "@primary_ip_with_icon" "yes"
   fi
+  set_tmux_option "@primary_ip_icon" ""
 }
 
 main
