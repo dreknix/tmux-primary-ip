@@ -2,7 +2,7 @@
 
 A tmux plugin that displays the primary IP address in the status bar.
 
-The plugin introduces a new `#{primary-ip}` format.
+The plugin introduces a new `#{primary_ip}` format.
 
 The status bar is updated every `status-interval` seconds. If the option is not
 set, the status bar is updated every 15 seconds.
@@ -11,38 +11,37 @@ set, the status bar is updated every 15 seconds.
 
 Add plugin to the list of TPM plugins in `~/.config/tmux/tmux.conf`:
 
-```
+``` plain
 set -g plugin 'dreknix/tmux-primary-ip'
 ```
 
 Hit `prefix + I` to install the plugin and source it.
 
-The `#{primary-ip}` interpolation should now work.
+The `#{primary_ip}` interpolation should now work.
 
-## Customisation
+## Customization
 
 The plugin can be used with the [Catppuccin theme](https://github.com/catppuccin/tmux).
-Add the following script to `custom/primary_ip.sh`:
+Add the following configuration `custom_modules/primary_ip.conf`:
 
-``` bash
-#!/usr/bin/env bash
+``` plain
+%hidden MODULE_NAME='primary_ip'
 
-show_primary_ip() {
-  local index=$1
+set -ogq "@catppuccin_${MODULE_NAME}_icon" '#{l:#{primary_ip_icon}} '
+set -ogqF "@catppuccin_${MODULE_NAME}_color" '#{E:@thm_lavender}'
+set -ogq "@catppuccin_${MODULE_NAME}_text" '#{l:#{primary_ip}}'
 
-  local icon="#(tmux show-option -gqv '@primary_ip_icon')"
-  local color=$(get_tmux_option "@primary_ip_color" "$thm_magenta")
-  local text=$(get_tmux_option "@primaray_ip_text" "#{primary-ip}")
-
-  local module=$( build_status_module "$index" "$icon" "$color" "$text" )
-
-  echo "$module"
-}
+source -F '#{TMUX_PLUGIN_MANAGER_PATH}/tmux/utils/status_module.conf'
 ```
 
-Add `set -g @primary_ip_with_icon 'no'` into `tmux.conf` to hide icon output.
-Add `primary_ip` to `@catppuccin_status_modules_left` or
-`@catppuccin_status_modules_right`.
+Add the following lines into `tmux.conf`:
+
+``` plain
+set-environment -gF TMUX_PLUGIN_MANAGER_PATH '#{HOME}/.local/share/tmux/plugins/'
+run '#{TMUX_PLUGIN_MANAGER_PATH}/tmux/catppuccin.tmux'
+source -F '#{d:current_file}/custom_modules/primary_ip.conf'
+set -agF status-right '#{E:@catppuccin_status_primary_ip}'
+```
 
 ## License
 
