@@ -2,13 +2,23 @@
 
 CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-primary_ip="#($CURRENT_DIR/scripts/primary-ip.sh)"
-primary_ip_interpolation_string="\#{primary-ip}"
+primary_ip_interpolations=(
+  "\#{primary_ip}"
+  "\#{primary_ip_icon}"
+)
+primary_ip_commands=(
+  "#($CURRENT_DIR/scripts/primary_ip.sh)"
+  "#($CURRENT_DIR/scripts/primary_ip_icon.sh)"
+)
 
 do_interpolation() {
-  local string="$1"
-  local interpolated="${string/$primary_ip_interpolation_string/$primary_ip}"
-  echo "$interpolated"
+  local all_interpolated="$1"
+  echo "before: $all_interpolated" >> ~/tmux
+  for ((i=0; i<${#primary_ip_commands[@]}; i++)); do
+    all_interpolated=${all_interpolated//${primary_ip_interpolations[$i]}/${primary_ip_commands[$i]}}
+  done
+  echo "after: $all_interpolated" >> ~/tmux
+  echo "$all_interpolated"
 }
 
 set_tmux_option() {
@@ -36,18 +46,8 @@ update_tmux_option() {
 }
 
 main() {
-
-  # initialize icon
-  "${CURRENT_DIR}/scripts/primary-ip.sh" > /dev/null 2>&1
-
   update_tmux_option "status-right"
   update_tmux_option "status-left"
-
-  if [ -z "$(get_tmux_option '@primary_ip_with_icon' '')" ]
-  then
-    set_tmux_option "@primary_ip_with_icon" "yes"
-  fi
-  set_tmux_option "@primary_ip_icon" ""
 }
 
 main
