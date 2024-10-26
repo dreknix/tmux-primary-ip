@@ -15,11 +15,9 @@ primary_ip_commands=(
 
 do_interpolation() {
   local all_interpolated="$1"
-  echo "before: $all_interpolated" >> ~/tmux
   for ((i=0; i<${#primary_ip_commands[@]}; i++)); do
     all_interpolated=${all_interpolated//${primary_ip_interpolations[$i]}/${primary_ip_commands[$i]}}
   done
-  echo "after: $all_interpolated" >> ~/tmux
   echo "$all_interpolated"
 }
 
