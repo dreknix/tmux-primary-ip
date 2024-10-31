@@ -27,22 +27,10 @@ get_icon_settings() {
 print_icon() {
   result=$(get_primary_ip)
 
-  if=$(echo "$result" | cut -f1 -d:)
+  icon=$(echo "$result" | cut -f1 -d:)
 
-  case "${if}" in
-    en|et)
-      printf "%s" "${icon_ethernet}"
-      ;;
-    wl)
-      printf "%s" "${icon_wifi}"
-      ;;
-    vp)
-      printf "%s" "${icon_vpn}"
-      ;;
-    *)
-      printf "%s" "${icon_unknown}"
-      ;;
-  esac
+  icon_name="icon_${icon}"
+  printf "%s" "${!icon_name}"
 }
 
 main() {
