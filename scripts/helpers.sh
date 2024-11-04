@@ -50,25 +50,21 @@ get_primary_ip_linux() {
   if="NONE"
   route_str="$(ip route get 8.8.8.8 2> /dev/null | head -1)"
   if [ -n "${route_str}" ]; then
-    if echo "${route_str}" | /usr/bin/grep -q " via "; then
-      ip=$(echo "${route_str}" | cut -d' ' -f7)
-    else
-      ip=$(echo "${route_str}" | cut -d' ' -f5)
-    fi
-
-    if=$(ip address show to "${ip}" | head -1 | cut -f2 -d: | tr -d ' ' | cut -c1-2)
+    ip=$(echo "${route_str}" | cut -d' ' -f7)
+    default_if=$(echo $route_str | awk '{for (i=1; i<NF; i++) if ($i == "dev") {print $(i+1); break}}')
+    if=$(nmcli con show --active | grep -h $default_if | awk '{print $3}')
   else
     ip="no internet"
   fi
 
   case "${if}" in
-    en|et)
+    ethernet)
       icon="ethernet"
       ;;
-    wl)
+    wifi)
       icon="wifi"
       ;;
-    vp)
+    vpn|wireguard)
       icon="vpn"
       ;;
     *)
