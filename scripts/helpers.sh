@@ -51,8 +51,8 @@ get_primary_ip_linux() {
   route_str="$(ip route get 8.8.8.8 2> /dev/null | head -1)"
   if [ -n "${route_str}" ]; then
     ip=$(echo "${route_str}" | cut -d' ' -f7)
-    default_if=$(echo $route_str | awk '{for (i=1; i<NF; i++) if ($i == "dev") {print $(i+1); break}}')
-    if=$(nmcli con show --active | grep -h $default_if | awk '{print $3}')
+    default_if=$(echo "${route_str}" | awk '{for (i=1; i<NF; i++) if ($i == "dev") {print $(i+1); break}}')
+    if=$(nmcli con show --active | grep -h "${default_if}" | awk '{print $(NF-1)}')
   else
     ip="no internet"
   fi
