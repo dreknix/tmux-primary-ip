@@ -52,7 +52,7 @@ get_primary_ip_linux() {
   if [ -n "${route_str}" ]; then
     ip=$(echo "${route_str}" | cut -d' ' -f7)
     default_if=$(echo "${route_str}" | awk '{for (i=1; i<NF; i++) if ($i == "dev") {print $(i+1); break}}')
-    if=$(nmcli con show --active | grep -h "${default_if}" | awk '{print $(NF-1)}')
+    if=$(nmcli con show --active | grep -h "${default_if}" | awk '{print $(NF-1)}' | head -n 1)
   else
     ip="no internet"
   fi
