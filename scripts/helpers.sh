@@ -46,6 +46,36 @@ get_primary_ip_macos() {
   printf "%s:%s" "${icon}" "${ip}"
 }
 
+get_primary_ip_freebsd () {
+    if="NONE"
+    route_str="$(route -n get 8.8.8.8 2> /dev/null | grep 'interface:' | awk '{ print $2 }')"
+    if [ -n "${route_str}" ]; then
+        if="${route_str}"
+        ip="$(ifconfig ${if} 2> /dev/null | grep 'inet ' | awk -F ' ' '{ print $2 }')"
+    else
+      ip="no internet"
+    fi
+
+    case "${if}" in
+      vt*)
+        ethernet="$(ifconfig ${if} | grep 'media:' | grep 'base-T')"
+        if [ -n "${ethernet}" ]; then
+          icon="ethernet"
+        else
+          icon="wifi"
+        fi
+        ;;
+      tun*|utun*|ipsec*|wg*|tailscale*)
+        icon="vpn"
+        ;;
+      *)
+        icon="unkown"
+        ;;
+    esac
+
+    printf "%s:%s" "${icon}" "${ip}"
+}
+
 get_primary_ip_linux() {
   if="NONE"
   route_str="$(ip route get 8.8.8.8 2> /dev/null | head -1)"
@@ -79,6 +109,9 @@ get_primary_ip() {
   case "$(uname -s)" in
     Darwin*)
       get_primary_ip_macos
+      ;;
+    FreeBSD*)
+      get_primary_ip_freebsd
       ;;
     *)
       get_primary_ip_linux
