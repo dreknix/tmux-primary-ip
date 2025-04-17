@@ -22,7 +22,7 @@ get_primary_ip_macos() {
   route_str="$(route -n get 8.8.8.8 2> /dev/null | grep 'interface:' | awk '{ print $2 }')"
   if [ -n "${route_str}" ]; then
     if="${route_str}"
-    ip="$(ipconfig getifaddr "${if}" 2> /dev/null)"
+    ip="$(ifconfig ${if} 2> /dev/null | grep 'inet ' | awk -F ' ' '{ print $2 }')"
   else
     ip="no internet"
   fi
