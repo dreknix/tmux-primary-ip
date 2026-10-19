@@ -19,6 +19,17 @@ Hit `prefix + I` to install the plugin and source it.
 
 The `#{primary_ip}` interpolation should now work.
 
+## Caching
+
+Every attached tmux client runs the plugin's scripts on each status refresh.
+On Linux, each run starts `nmcli`, which talks to NetworkManager over D-Bus.
+With many clients attached this keeps NetworkManager and `dbus-daemon` busy,
+so the result is cached for 15 seconds by default.
+
+``` plain
+set -g @primary_ip_cache_ttl 15  # seconds; 0 disables the cache
+```
+
 ## Customization
 
 The plugin can be used with the [Catppuccin theme](https://github.com/catppuccin/tmux).
