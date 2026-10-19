@@ -105,7 +105,7 @@ get_primary_ip_linux() {
   printf "%s:%s" "${icon}" "${ip}"
 }
 
-get_primary_ip() {
+get_primary_ip_uncached() {
   case "$(uname -s)" in
     Darwin*)
       get_primary_ip_macos
@@ -117,4 +117,34 @@ get_primary_ip() {
       get_primary_ip_linux
       ;;
   esac
+}
+
+file_mtime() {
+  stat -c %Y "$1" 2> /dev/null || stat -f %m "$1" 2> /dev/null
+}
+
+# Every attached tmux client runs the status scripts on each refresh, and on
+# Linux each run starts nmcli (a D-Bus client of NetworkManager). Cache the
+# result for @primary_ip_cache_ttl seconds; 0 disables the cache.
+get_primary_ip() {
+  local ttl cache_dir cache mtime result
+  ttl=$(get_tmux_option '@primary_ip_cache_ttl' '15')
+  if ! [ "${ttl}" -gt 0 ] 2> /dev/null; then
+    get_primary_ip_uncached
+    return
+  fi
+
+  cache_dir="${XDG_RUNTIME_DIR:-${TMPDIR:-/tmp}}"
+  cache="${cache_dir%/}/tmux-primary-ip-$(id -u)"
+  if [ -f "${cache}" ]; then
+    mtime=$(file_mtime "${cache}")
+    if [ -n "${mtime}" ] && [ $(( $(date +%s) - mtime )) -lt "${ttl}" ]; then
+      cat "${cache}"
+      return
+    fi
+  fi
+
+  result=$(get_primary_ip_uncached)
+  printf "%s" "${result}" > "${cache}.$$" && mv -f "${cache}.$$" "${cache}"
+  printf "%s" "${result}"
 }
